@@ -6,7 +6,7 @@
       <html
         ref="html"
         lang="en"
-        :style="{ backgroundColor: `${colors.logoBg.color}` }"
+        :style="{ backgroundColor: `${colors.mainBg.color}` }"
       >
         <head>
           <meta charset="UTF-8" />
@@ -135,14 +135,13 @@
                 ></div>
               </a>
             </div>
-            <div class="headerImgC">
+            <div class="headerImgC" :style="coverStyle">
               <img
-                id="cover"
-                v-if="images.cover.url"
-                :src="
-                  PreviewMode ? images.cover.url : `./cover.${images.cover.ext}`
-                "
-                alt="Background Pattern"
+                v-if="getAsiLogoUrl"
+                id="asiLogo"
+                :src="getAsiLogoUrl"
+                alt="ASI CSUF"
+                class="headerCenter"
               />
               <img
                 id="logo"
@@ -430,6 +429,31 @@ export default {
         return css.match(/^font-family[^;]*/)[0]
       }
     },
+    coverStyle() {
+      let imageUrl = this.images.cover.url
+        ? this.images.cover.url
+        : require('~/assets/images/cover.jpeg')
+      if (!imageUrl) {
+        return {}
+      }
+      if (!this.PreviewMode && this.images.cover.ext) {
+        imageUrl = `./cover.${this.images.cover.ext}`
+      }
+      return {
+        backgroundImage: `url(${imageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '20rem',
+      }
+    },
+    getAsiLogoUrl() {
+      try {
+        return require('~/assets/images/logo.png')
+      } catch (e) {
+        return null
+      }
+    },
   },
   methods: {
     getHref(e) {
@@ -631,6 +655,18 @@ export default {
     grid-row: 1;
     align-self: center;
     justify-self: center;
+    margin-top: -50px;
+  }
+  .headerCenter {
+    width: 96px;
+    height: 96px;
+    pointer-events: none;
+    user-select: none;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
   }
   #topActions {
     flex-direction: row-reverse;
@@ -995,6 +1031,17 @@ export default {
     align-self: center;
     justify-self: center;
   }
+  .headerCenter {
+    width: 96px;
+    height: 96px;
+    pointer-events: none;
+    user-select: none;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
+  }
   #topActions {
     flex-direction: row-reverse;
     justify-content: space-between;
@@ -1357,6 +1404,17 @@ export default {
     grid-row: 1;
     align-self: center;
     justify-self: center;
+  }
+  .headerCenter {
+    width: 96px;
+    height: 96px;
+    pointer-events: none;
+    user-select: none;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
   }
   #topActions {
     flex-direction: row-reverse;

@@ -16,11 +16,11 @@
             v-show="colors[name].openPalette"
             v-on-clickaway="() => closeColourPalette(name)"
           >
-            <colorpicker
+            <!-- <colorpicker
               theme="light"
               :color="colors[name].color"
               @changeColor="changeColour($event, name)"
-            ></colorpicker>
+            ></colorpicker> -->
           </div>
         </transition>
       </div>
@@ -30,11 +30,11 @@
 </template>
 
 <script>
-import colorpicker from '@caohenghu/vue-colorpicker'
+// import colorpicker from '@caohenghu/vue-colorpicker'
 import { directive as onClickaway } from 'vue-clickaway2'
 export default {
   components: {
-    colorpicker,
+    // colorpicker,
   },
   directives: {
     onClickaway: onClickaway,

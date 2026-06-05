@@ -1060,6 +1060,7 @@ import Cropper from '@/components/Cropper'
 import Vcard from '@/components/Vcard'
 import JSZip from 'jszip'
 import draggable from 'vuedraggable'
+import coverImage from '~/assets/images/cover.jpeg'
 
 import { saveAs } from 'file-saver'
 import QRCode from '!!raw-loader!~/static/qrcode.min.js'
@@ -1117,28 +1118,28 @@ export default {
           resized: null,
         },
         cover: {
-          url: null,
+          url: coverImage,
           blob: null,
-          ext: null,
-          mime: null,
+          ext: 'jpeg',
+          mime: 'image/jpeg',
           resized: null,
         },
       },
       colors: {
         logoBg: {
-          color: `#059669`,
+          color: `#00244E`,
           openPalette: false,
         },
         mainBg: {
-          color: `#ddd`,
+          color: `#00244E`,
           openPalette: false,
         },
         buttonBg: {
-          color: `#059669`,
+          color: `#FF7900`,
           openPalette: false,
         },
         cardBg: {
-          color: `#fff`,
+          color: `#00244E`,
           openPalette: false,
         },
       },
@@ -1956,7 +1957,7 @@ export default {
         img.src = e.target.result
         img.onload = () => {
           if (type == 'photo') {
-            canvas.width = canvas.height = 320
+            canvas.width = canvas.height = 200
           } else {
             if (type == 'logo') {
               maxWidth = 960
@@ -2170,6 +2171,16 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.checkView)
+    if (this.images.cover.url && !this.images.cover.resized) {
+      fetch(this.images.cover.url)
+        .then((res) => res.blob())
+        .then((blob) => {
+          this.images.cover.resized = blob
+        })
+        .catch(() => {
+          // ignore fetch failure for default cover image
+        })
+    }
     // window.onbeforeunload = function () {
     //   return 'Your work will be lost.'
     // }
