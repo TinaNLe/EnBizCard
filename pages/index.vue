@@ -27,7 +27,7 @@
       >
         <div
           class="logo w-16 m-4"
-          v-html="require(`~/assets/icons/logo.svg?include`)"
+          v-html="require(`assets/icons/logo.svg?include`)"
         ></div>
         <button
           class="
@@ -1060,7 +1060,6 @@ import Cropper from '@/components/Cropper'
 import Vcard from '@/components/Vcard'
 import JSZip from 'jszip'
 import draggable from 'vuedraggable'
-import coverImage from '~/assets/images/cover.jpeg'
 
 import { saveAs } from 'file-saver'
 import QRCode from '!!raw-loader!~/static/qrcode.min.js'
@@ -1118,7 +1117,7 @@ export default {
           resized: null,
         },
         cover: {
-          url: coverImage,
+          url: 'cover.jpeg',
           blob: null,
           ext: 'jpeg',
           mime: 'image/jpeg',
@@ -1139,7 +1138,7 @@ export default {
           openPalette: false,
         },
         cardBg: {
-          color: `#00244E`,
+          color: `#DDD`,
           openPalette: false,
         },
       },

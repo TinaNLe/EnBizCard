@@ -362,6 +362,7 @@ import ProductShowcase from './ProductShowcase'
 import utils from '@/mixins/utils'
 import { mapState } from 'vuex'
 
+
 export default {
   props: [
     'username',
@@ -432,7 +433,7 @@ export default {
     coverStyle() {
       let imageUrl = this.images.cover.url
         ? this.images.cover.url
-        : require('~/assets/images/cover.jpeg')
+        : '/logo.png'
       if (!imageUrl) {
         return {}
       }
@@ -448,11 +449,10 @@ export default {
       }
     },
     getAsiLogoUrl() {
-      try {
-        return require('~/assets/images/logo.png')
-      } catch (e) {
-        return null
-      }
+     if (this.exportMode) {
+      return 'logo.png' // ZIP
+    }
+    return '/logo.png'   // Nuxt
     },
   },
   methods: {
