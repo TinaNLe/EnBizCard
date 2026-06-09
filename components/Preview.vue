@@ -6,7 +6,7 @@
       <html
         ref="html"
         lang="en"
-        :style="{ backgroundColor: `${colors.mainBg.color}` }"
+        :style="{ backgroundColor: `${colors.logoBg.color}` }"
       >
         <head>
           <meta charset="UTF-8" />
@@ -106,7 +106,7 @@
               <p>to view my Business Card on another device</p>
             </div>
           </div>
-          <header>
+          <header :style="{ backgroundColor: colors.logoBg.color }">
             <div
               id="topActions"
               :style="{ display: PreviewMode ? 'flex' : 'none' }"
@@ -136,13 +136,6 @@
               </a>
             </div>
             <div class="headerImgC" :style="coverStyle">
-              <img
-                v-if="getAsiLogoUrl"
-                id="asiLogo"
-                :src="getAsiLogoUrl"
-                alt="ASI CSUF"
-                class="headerCenter"
-              />
               <img
                 id="logo"
                 v-if="images.logo.url"
@@ -447,12 +440,6 @@ export default {
         backgroundRepeat: 'no-repeat',
         minHeight: '20rem',
       }
-    },
-    getAsiLogoUrl() {
-     if (this.exportMode) {
-      return 'logo.png' // ZIP
-    }
-    return '/logo.png'   // Nuxt
     },
   },
   methods: {

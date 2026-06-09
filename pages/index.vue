@@ -1130,7 +1130,7 @@ export default {
           openPalette: false,
         },
         mainBg: {
-          color: `#00244E`,
+          color: `#DDDDDD`,
           openPalette: false,
         },
         buttonBg: {
@@ -1138,7 +1138,7 @@ export default {
           openPalette: false,
         },
         cardBg: {
-          color: `#DDD`,
+          color: `#DDDDDD`,
           openPalette: false,
         },
       },
@@ -1724,12 +1724,7 @@ export default {
           },
         ],
       },
-      featured: [
-        {
-          title: 'Section title',
-          content: [],
-        },
-      ],
+      featured: [],
       hostedURL: null,
       footerCredit: true,
       PreviewMode: true,
@@ -1956,7 +1951,7 @@ export default {
         img.src = e.target.result
         img.onload = () => {
           if (type == 'photo') {
-            canvas.width = canvas.height = 200
+            canvas.width = canvas.height = 160
           } else {
             if (type == 'logo') {
               maxWidth = 960
@@ -2170,6 +2165,23 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.checkView)
+    fetch('/logo.png')
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader()
+        reader.onload = (f) => {
+          const dataUri = f.target.result
+          this.images.logo = {
+            url: dataUri,
+            blob,
+            ext: 'png',
+            mime: 'image/png',
+            resized: blob,
+          }
+        }
+        reader.readAsDataURL(blob)
+      })
+      .catch(() => {})
     if (this.images.cover.url && !this.images.cover.resized) {
       fetch(this.images.cover.url)
         .then((res) => res.blob())
