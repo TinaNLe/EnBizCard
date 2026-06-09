@@ -15,6 +15,7 @@ EMAIL;TYPE=WORK:{{ vCard.email }}
 URL;TYPE=Digital Business Card:{{ vCard.hostedURL }}
 URL:{{ vCard.website }}
 {{ getURLs }}
+PHOTO;ENCODING=BASE64;TYPE={{ vCard.photoType }}:{{ vCard.photo }}
 KEY;TYPE=PGP;ENCODING=b:{{ vCard.key }}
 NOTE:{{ vCard.note }}
 UID:{{ vCard.uid }}

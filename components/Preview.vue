@@ -162,9 +162,7 @@
             <img
               id="profilePhoto"
               v-if="images.photo.url"
-              :src="
-                PreviewMode ? images.photo.url : `./photo.${images.photo.ext}`
-              "
+              :src="images.photo.url"
               alt="Photo"
             />
             <div id="info" class="textColor">

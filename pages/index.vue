@@ -1818,6 +1818,12 @@ export default {
         : null
       let key = this.pubKeyIsValid ? window.btoa(this.genInfo.key) : null
       let randomNumber = Math.floor(100000000 + Math.random() * 900000)
+      let photo = this.images.photo.url
+        ? this.images.photo.url.split(',')[1]
+        : null
+      let photoType = this.images.photo.mime
+        ? this.images.photo.mime.split('/')[1].toUpperCase()
+        : null
       return {
         fn: this.genInfo.fname,
         ln: this.genInfo.lname,
@@ -1834,6 +1840,8 @@ export default {
         urls,
         key,
         note,
+        photo,
+        photoType,
         uid: `EnBizCard-${randomNumber}`,
       }
     },
@@ -1974,6 +1982,9 @@ export default {
             canvas.height = height
           }
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          if (type === 'photo') {
+            vm.images[type].url = canvas.toDataURL(mime, 0.8)
+          }
           canvas.toBlob(
             (blob) => {
               let image = new File([blob], type, {
@@ -2091,9 +2102,9 @@ export default {
           zip.folder(username).file('qrcode.min.js', qrScript)
           zip.file('Hosting-Guide.html', guide)
 
-          // Image attachments
+          // Image attachments (photo is base64-embedded in HTML, skip as file)
           for (const key in this.images) {
-            if (this.images[key].url) {
+            if (this.images[key].url && key !== 'photo') {
               zip
                 .folder(username)
                 .file(
