@@ -230,7 +230,6 @@ build: {
         ],
         exclude: /(node_modules)/,
       })
-      // Exclude pdfjs from babel
       config.module.rules.push({
         test: /pdfjs-dist/,
         use: [
@@ -243,6 +242,7 @@ build: {
         ],
       })
     },
+  },
   generate: {
     dir: 'public',
     fallback: true,
