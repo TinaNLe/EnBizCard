@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=1536"
-RUN npm run build
+RUN npm run generate
 
 FROM nginx:1.27-alpine
 COPY --from=builder /app/public /usr/share/nginx/html
