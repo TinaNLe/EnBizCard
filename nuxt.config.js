@@ -213,7 +213,7 @@ export default {
    ** Build configuration
    ** See https://nuxtjs.org/api/configuration-build/
    */
-  build: {
+build: {
     babel: {
       ignore: [/pdfjs-dist/]
     },
@@ -230,26 +230,19 @@ export default {
         ],
         exclude: /(node_modules)/,
       })
+      // Exclude pdfjs from babel
+      config.module.rules.push({
+        test: /pdfjs-dist/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [['@babel/preset-env', { targets: { esmodules: true } }]],
+            },
+          },
+        ],
+      })
     },
-   html: {
-      minify: {
-        collapseBooleanAttributes: true,
-        collapseInlineTagWhitespace: true,
-        collapseWhitespace: true,
-        html5: true,
-        decodeEntities: true,
-        minifyCSS: true,
-        minifyJS: true,
-        processConditionalComments: true,
-        removeComments: true,
-        removeEmptyAttributes: true,
-        removeRedundantAttributes: true,
-        sortClassName: true,
-        trimCustomFragments: true,
-        useShortDoctype: true,
-      },
-    },
-  },
   generate: {
     dir: 'public',
     fallback: true,
