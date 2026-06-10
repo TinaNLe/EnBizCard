@@ -214,6 +214,9 @@ export default {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {
+    babel: {
+      ignore: [/pdfjs-dist/]
+    },
     extend(config) {
       config.module.rules.push({
         test: /\.min.css|\.min.js$/,
@@ -228,7 +231,7 @@ export default {
         exclude: /(node_modules)/,
       })
     },
-    html: {
+   html: {
       minify: {
         collapseBooleanAttributes: true,
         collapseInlineTagWhitespace: true,
