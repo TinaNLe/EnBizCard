@@ -2,16 +2,21 @@ version: '3.8'
 
 services:
   enbizcard:
-    build: .
+    build:
+      context: .
+      args:
+        NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
     container_name: enbizcard
     ports:
-      - "${ENBIZCARD_PORT}:80"
+      - "${ENBIZCARD_PORT:-8000}:80"
     restart: always
 
   dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
     container_name: enbizcard-dev
     ports:
       - "2221:2221"
@@ -22,4 +27,5 @@ services:
       HOST: 0.0.0.0
       PORT: 2221
       CHOKIDAR_USEPOLLING: "true"
+      NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
     command: npm run dev
