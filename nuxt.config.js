@@ -1,4 +1,5 @@
 export default {
+  buildDir: 'C:/Users/zz-tinale/AppData/Local/Temp/enbizcard-nuxt',
   /*
    ** Nuxt rendering mode
    ** See https://nuxtjs.org/api/configuration-mode
@@ -250,6 +251,20 @@ export default {
   generate: {
     dir: 'public',
     fallback: true,
+  },
+  hooks: {
+    ready() {
+      const fs = require('fs')
+      const path = require('path')
+      const src = path.resolve(__dirname, '.config')
+      const dest = path.resolve(__dirname, 'static', '.config')
+      const sync = () => {
+        if (fs.existsSync(src)) fs.copyFileSync(src, dest)
+        else if (fs.existsSync(dest)) fs.unlinkSync(dest)
+      }
+      sync()
+      fs.watch(src, { persistent: false }, sync)
+    },
   },
   telemetry: false,
 }

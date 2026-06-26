@@ -1840,6 +1840,14 @@ export default {
         key,
         note,
         uid: `EnBizCard-${randomNumber}`,
+        photo: (() => {
+          const url = this.images.photo && this.images.photo.url
+          if (!url) return null
+          const mime = url.split(';')[0].split(':')[1]
+          const type = mime.split('/')[1].toUpperCase()
+          const b64 = url.split(',')[1]
+          return { type, b64 }
+        })(),
       }
     },
   },
@@ -1956,7 +1964,7 @@ export default {
         img.src = e.target.result
         img.onload = () => {
           if (type == 'photo') {
-            canvas.width = canvas.height = 320
+            canvas.width = canvas.height = this._photoSize || 320
           } else {
             if (type == 'logo') {
               maxWidth = 960
@@ -1994,6 +2002,10 @@ export default {
                 }
               } else {
                 vm.images[type].resized = image
+                // Read blob bytes → base64 exactly like PowerShell ReadAllBytes → ToBase64String
+                const fr = new FileReader()
+                fr.onload = () => { vm.images[type].url = fr.result }
+                fr.readAsDataURL(blob)
               }
             },
             mime,
@@ -2167,12 +2179,98 @@ export default {
         }, 250)
       }
     },
+    loadConfigColors(colors) {
+      const defaults = { logoBg: '#059669', buttonBg: '#059669' }
+      for (const key of Object.keys(defaults)) {
+        if (this.colors[key]) {
+          this.colors[key].color = (colors && colors[key]) ? colors[key] : defaults[key]
+        }
+      }
+    },
+    async loadConfig() {
+      const config = await fetch('/.config').then((r) => r.json()).catch(() => null)
+      this.loadConfigColors(config ? config.colors : null)
+      this._photoSize = config?.images?.photo?.size || 320
+      await this.loadConfigImages(config)
+    },
+    async loadConfigImages(config) {
+      const emptyImage = () => ({ url: null, blob: null, ext: null, mime: null, resized: null })
+
+      if (!config || !config.images) {
+        for (const type of this._configLoadedTypes) {
+          this.images[type] = emptyImage()
+        }
+        this._configLoadedTypes.clear()
+        return
+      }
+
+      const currentTypes = new Set(Object.keys(config.images))
+      for (const type of this._configLoadedTypes) {
+        if (!currentTypes.has(type)) {
+          this.images[type] = emptyImage()
+          this._configLoadedTypes.delete(type)
+        }
+      }
+
+      for (const [type, entry] of Object.entries(config.images)) {
+        if (!this.images[type]) continue
+
+        // base64 string pasted directly into config
+        if (entry.base64) {
+          if (this._configLoadedTypes.has(type) && this.images[type].url) continue
+          const mime = `image/${entry.format || 'jpeg'}`
+          const dataURI = `data:${mime};base64,${entry.base64}`
+          const ext = entry.format || 'jpeg'
+          this.images[type] = { url: dataURI, blob: null, ext, mime, resized: null }
+          this._configLoadedTypes.add(type)
+          continue
+        }
+
+        if (!entry.file) {
+          if (this._configLoadedTypes.has(type)) {
+            this.images[type] = emptyImage()
+            this._configLoadedTypes.delete(type)
+          }
+          continue
+        }
+        if (this._configLoadedTypes.has(type) && this.images[type].url) continue
+        try {
+          const res = await fetch(`/${entry.folder || 'images'}/${entry.file}`)
+          if (!res.ok) {
+            if (this._configLoadedTypes.has(type)) {
+              this.images[type] = emptyImage()
+              this._configLoadedTypes.delete(type)
+            }
+            continue
+          }
+          const blob = await res.blob()
+          const mime = blob.type
+          const ext = entry.file.split('.').pop()
+          const dataURI = await new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (e) => resolve(e.target.result)
+            reader.readAsDataURL(blob)
+          })
+          const file = new File([blob], entry.file, { type: mime })
+          this.images[type] = { url: dataURI, blob: file, ext, mime, resized: file }
+          this._configLoadedTypes.add(type)
+          this.resizeImage(type, mime)
+        } catch (_) {}
+      }
+    },
   },
-  mounted() {
+  async mounted() {
     window.addEventListener('scroll', this.checkView)
     // window.onbeforeunload = function () {
     //   return 'Your work will be lost.'
     // }
+    this._configLoadedTypes = new Set()
+    this._photoSize = 320
+    await this.loadConfig()
+    this._configWatcher = setInterval(() => this.loadConfig(), 3000)
+  },
+  beforeDestroy() {
+    clearInterval(this._configWatcher)
   },
 }
 </script>

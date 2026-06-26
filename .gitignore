@@ -92,3 +92,7 @@ sw.*
 
 
 .vscode
+
+.config
+
+/static/images

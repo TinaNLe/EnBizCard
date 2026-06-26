@@ -17,6 +17,7 @@ URL:{{ vCard.website }}
 {{ getURLs }}
 KEY;TYPE=PGP;ENCODING=b:{{ vCard.key }}
 NOTE:{{ vCard.note }}
+{{ getPhoto }}
 UID:{{ vCard.uid }}
 END:VCARD</pre
   >
@@ -30,6 +31,10 @@ export default {
       return this.vCard.urls
         .map((e) => `URL;TYPE=${e.title}:${e.url}`)
         .join('\n')
+    },
+    getPhoto() {
+      if (!this.vCard.photo) return ''
+      return `PHOTO;ENCODING=b;TYPE=${this.vCard.photo.type}:${this.vCard.photo.b64}`
     },
     getSplitName() {
       let fn = this.vCard.fn
