@@ -1,10 +1,10 @@
 .github
 .idea
-.nuxt
 .vscode
+.nuxt
+.output
 node_modules
 dist
-public
 /logs
 *.log
 npm-debug.log*

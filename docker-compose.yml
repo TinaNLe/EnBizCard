@@ -1,8 +1,34 @@
-version: '3.8'
 services:
   enbizcard:
-    build: .
+    build:
+      context: .
+      args:
+        NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
     container_name: enbizcard
     ports:
-      - ${ENBIZCARD_PORT}:80
+      - "${ENBIZCARD_PORT:-8000}:80"
+    volumes:
+      # Mount config and images so they can be updated without rebuilding the image.
+      # Create these files/folders on the host before running docker compose up.
+      - ./.config:/usr/share/nginx/html/.config:ro
+      - ./public/images:/usr/share/nginx/html/images:ro
     restart: always
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
+    container_name: enbizcard-dev
+    ports:
+      - "2221:2221"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      HOST: 0.0.0.0
+      PORT: 2221
+      CHOKIDAR_USEPOLLING: "true"
+      NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-}
+    command: sh -c "nuxt dev --host $${HOST} --port $${PORT}"

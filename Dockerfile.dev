@@ -1,0 +1,21 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+ARG NUXT_APP_BASE_URL=
+ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL}
+
+ENV NUXT_DEVTOOLS_ENABLED=false
+ENV PATH="/app/node_modules/.bin:${PATH}"
+
+# Only install deps at build time; source is volume-mounted at runtime
+COPY package.json ./
+RUN npm install
+
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 2221
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["sh", "-c", "nuxt dev --host ${HOST:-0.0.0.0} --port ${PORT:-2221}"]

@@ -1,0 +1,17 @@
+server {
+    listen 80;
+    server_name _;
+
+    location NUXT_BASE/ {
+        alias /usr/share/nginx/html/;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location = NUXT_BASE {
+        return 301 NUXT_BASE/;
+    }
+
+    location / {
+        return 301 NUXT_BASE/;
+    }
+}
