@@ -84,7 +84,7 @@
         </button>
         <a
           class="font-extrabold leading-none text-lg tracking-wide shrink-0 p-5 mt-2 text-white bg-gray-700 rounded hover:bg-gray-600 focus:bg-gray-600 transition-colors duration-200"
-          href="/demo"
+          :href="`${baseURL}demo`"
           target="_blank"
           >View demo</a
         >
@@ -381,6 +381,7 @@ import QRCode from '~/assets/scripts/qrcode.min.js?raw'
 
 const { theme, changeTheme } = useTheme()
 const { getIcon } = useIcons()
+const { app: { baseURL } } = useRuntimeConfig()
 
 // Refs
 const containerRef = ref<HTMLElement | null>(null)
@@ -824,7 +825,7 @@ function loadConfigColors(colorData: Record<string, string> | null) {
 }
 
 async function loadConfig() {
-  const config = await fetch('/.config').then((r) => r.json()).catch(() => null)
+  const config = await fetch(`${baseURL}.config`).then((r) => r.json()).catch(() => null)
   loadConfigColors(config?.colors ?? null)
   photoSize = config?.images?.photo?.size || 320
   await loadConfigImages(config)

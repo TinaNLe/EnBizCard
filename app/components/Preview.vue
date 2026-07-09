@@ -272,6 +272,7 @@ const props = defineProps<{
 
 const { theme } = useTheme()
 const { getIcon, getSVG } = useIcons()
+const { app: { baseURL } } = useRuntimeConfig()
 
 const htmlRef = ref<HTMLElement | null>(null)
 const modalRef = ref<HTMLElement | null>(null)
@@ -355,7 +356,7 @@ function closePublicKey() {
 
 function sharingAlert() {
   props.showAlert(
-    'You are able to share your business card after completing the hosting process.\n\nCheck out the <a class="underline font-extrabold text-emerald-600 hover:text-emerald-500 transition-colors duration-200" href="/demo" target="_blank">demo</a> to test the functionality.',
+    `You are able to share your business card after completing the hosting process.\n\nCheck out the <a class="underline font-extrabold text-emerald-600 hover:text-emerald-500 transition-colors duration-200" href="${baseURL}demo" target="_blank">demo</a> to test the functionality.`,
   )
 }
 
