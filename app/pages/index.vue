@@ -858,7 +858,7 @@ async function loadConfigImages(config: any) {
     }
     if (configLoadedTypes.has(type) && images[type].url) continue
     try {
-      const res = await fetch(`/${entry.folder || 'images'}/${entry.file}`)
+      const res = await fetch(`${baseURL}${entry.folder || 'images'}/${entry.file}`)
       if (!res.ok) { if (configLoadedTypes.has(type)) { images[type] = emptyImage(); configLoadedTypes.delete(type) } continue }
       const blob = await res.blob()
       const mime = blob.type
