@@ -37,6 +37,7 @@ RUN BASE="${NUXT_APP_BASE_URL%/}" && \
         '    listen 80;' \
         '    server_name _;' \
         '    sendfile off;' \
+        '    absolute_redirect off;' \
         '    root /usr/share/nginx/html;' \
         '    location / {' \
         '        try_files $uri $uri/ /index.html;' \
@@ -49,6 +50,7 @@ RUN BASE="${NUXT_APP_BASE_URL%/}" && \
         '    listen 80;' \
         '    server_name _;' \
         '    sendfile off;' \
+        '    absolute_redirect off;' \
         "    location ${BASE}/ {" \
         '        alias /usr/share/nginx/html/;' \
         '        try_files $uri $uri/ /index.html;' \
