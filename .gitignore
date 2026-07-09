@@ -67,10 +67,10 @@ typings/
 
 # nuxt.js build output
 .nuxt
+.output
 
 # Nuxt generate
 dist
-public
 
 # vuepress build output
 .vuepress/dist
@@ -93,5 +93,5 @@ sw.*
 
 .vscode
 
-.config
+public/config.json
 

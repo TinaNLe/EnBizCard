@@ -825,7 +825,7 @@ function loadConfigColors(colorData: Record<string, string> | null) {
 }
 
 async function loadConfig() {
-  const config = await fetch(`${baseURL}.config`).then((r) => r.json()).catch(() => null)
+  const config = await fetch(`${baseURL}config.json`).then((r) => r.json()).catch(() => null)
   loadConfigColors(config?.colors ?? null)
   photoSize = config?.images?.photo?.size || 320
   await loadConfigImages(config)
