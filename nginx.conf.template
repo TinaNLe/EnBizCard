@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    server_name _;
+
+    # Bind-mounted files (config.json, images) can serve stale with sendfile in Docker.
+    sendfile off;
+    # Emit relative redirects so the app works behind a reverse proxy.
+    absolute_redirect off;
+
+    root /usr/share/nginx/html;
+
+    # ponytail: no bare-root -> ${BASE}/ courtesy redirect. The try_files fallback
+    # already serves the app at /. Add `location = / { return 301 ${BASE}/; }` if the
+    # URL bar needs correcting.
+    location / {
+        try_files $uri $uri/ ${BASE}/index.html;
+    }
+}

@@ -68,7 +68,8 @@ EnBizCard/
 ├── Dockerfile.dev               # Development: node:22-alpine
 ├── docker-compose.yml
 ├── .dockerignore
-└── env.example
+├── nginx.conf.template         # Rendered by nginx's envsubst at container start
+└── .env.example
 ```
 
 ---
@@ -192,10 +193,16 @@ The base URL is controlled by the `NUXT_APP_BASE_URL` environment variable. It m
 
 ```ts
 // nuxt.config.ts
+// Nuxt copies app.baseURL into runtimeConfig.app.baseURL verbatim — it never adds or
+// strips a trailing slash. Normalize once so every consumer can concatenate.
+const base = `/${process.env.NUXT_APP_BASE_URL || ''}/`.replace(/\/+/g, '/')
+
 app: {
-  baseURL: process.env.NUXT_APP_BASE_URL || '/',
+  baseURL: base,
 }
 ```
+
+**Contract: `app.baseURL` always carries a leading *and* trailing slash.** `''` → `/`, `/bizcard` → `/bizcard/`. Callers append directly — `` `${baseURL}demo` ``, `base + 'favicon.ico'` — and never insert their own slash.
 
 Nuxt automatically prefixes all `_nuxt/` chunk URLs, `<NuxtLink>` hrefs, and CSS asset references with the configured base URL.
 
@@ -209,15 +216,13 @@ Nuxt automatically prefixes all `_nuxt/` chunk URLs, `<NuxtLink>` hrefs, and CSS
 
 ### Runtime Config
 
+Nuxt mirrors `app.baseURL` into the runtime config automatically. No `runtimeConfig` block is needed.
+
 ```ts
-runtimeConfig: {
-  public: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/'
-  }
-}
+const { app: { baseURL } } = useRuntimeConfig()
 ```
 
-Components can read the base URL at runtime via `useRuntimeConfig().public.baseURL`.
+Components read the base URL via `useRuntimeConfig().app.baseURL`. Because of the contract above it always ends in `/`, so `` `${baseURL}config.json` `` is correct.
 
 ---
 
@@ -227,46 +232,43 @@ Components can read the base URL at runtime via `useRuntimeConfig().public.baseU
 
 ```
 node:22-alpine (build stage)
-  npm ci
+  npm install
   npm run generate  ← Nuxt SSG with NUXT_APP_BASE_URL baked in
   → .output/public/
 
 nginx:alpine (runtime stage)
-  Copy .output/public/ → /usr/share/nginx/html/
-  Generate nginx config dynamically with printf
+  Copy .output/public/ → /usr/share/nginx/html/${NUXT_APP_BASE_URL}
+  Copy nginx.conf.template → /etc/nginx/templates/
+  ↳ nginx's own entrypoint renders it with envsubst at container start
   Expose port 80
 ```
 
 ### Nginx Configuration
 
-The nginx config is generated at Docker image build time using `printf` based on `NUXT_APP_BASE_URL`:
+The bundle is copied *into* the subpath at image build time:
 
-**Root deployment (`/`):**
+```dockerfile
+COPY --from=build /app/.output/public /usr/share/nginx/html/${NUXT_APP_BASE_URL}
+```
+
+So `/bizcard/_nuxt/main.js` maps to `/usr/share/nginx/html/bizcard/_nuxt/main.js` under a plain `root`. No `alias`, and one config for every deployment.
+
+`nginx.conf.template` is rendered at *container start* by nginx:alpine's built-in `/docker-entrypoint.d/20-envsubst-on-templates.sh`, which substitutes `$BASE` and leaves nginx's own `$uri` alone (it only substitutes names present in the environment):
+
 ```nginx
 server {
     listen 80;
+    server_name _;
+    sendfile off;
+    absolute_redirect off;
     root /usr/share/nginx/html;
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ ${BASE}/index.html;
     }
 }
 ```
 
-**Subpath deployment (`/bizcard`):**
-```nginx
-server {
-    listen 80;
-    location /bizcard/ {
-        alias /usr/share/nginx/html/;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-    }
-    location = /bizcard { return 301 /bizcard/; }
-    location / { return 301 /bizcard/; }
-}
-```
-
-The `alias` directive strips the base path prefix before looking up files in the static directory, so `/bizcard/_nuxt/main.js` maps to `/usr/share/nginx/html/_nuxt/main.js`.
+`BASE=""` yields the fallback `/index.html`; `BASE=/bizcard` yields `/bizcard/index.html`. The SPA fallback must be base-qualified — a bare `/index.html` would re-enter location matching and bounce deep links to the site root.
 
 ### Development (`Dockerfile.dev`)
 

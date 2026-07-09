@@ -70,10 +70,10 @@ In order to quickly host the EnBizCard Generator on a machine running Docker and
 git clone git@github.com:vishnuraghavb/EnBizCard.git
 ```
 
-2. Create a .env file by copying and adjusting env.example:
+2. Create a .env file by copying and adjusting .env.example:
 
 ```
-cp env.example .env
+cp .env.example .env
 ```
 
 3. Run `docker-compose up -d`
