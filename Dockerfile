@@ -26,6 +26,22 @@ ENV BASE=${NUXT_APP_BASE_URL}
 # server — no alias, no per-base location branching.
 COPY --from=build /app/.output/public /usr/share/nginx/html/${NUXT_APP_BASE_URL}
 
+# nginx:alpine ships its own index.html at the html root. Under a subpath deploy the
+# bundle lands beside it, so `GET /` resolves the directory index and serves the nginx
+# welcome page instead of the app. Drop it.
+RUN rm -f /usr/share/nginx/html/index.html /usr/share/nginx/html/50x.html
+
+# Send bare `/` to the subpath: the SPA boots Vue Router with base ${BASE}/ and will not
+# match `/`, so serving index.html there lands on the SPA's own 404. Empty file for root
+# deploys, where `return 301 /` would loop forever. Cannot live in the template —
+# envsubst has no conditionals.
+RUN if [ -n "${NUXT_APP_BASE_URL#/}" ]; then \
+      printf 'location = / { return 301 %s/; }\n' "${NUXT_APP_BASE_URL%/}" \
+        > /etc/nginx/root-redirect.conf; \
+    else \
+      : > /etc/nginx/root-redirect.conf; \
+    fi
+
 # nginx:alpine's /docker-entrypoint.d/20-envsubst-on-templates.sh renders this into
 # /etc/nginx/conf.d/default.conf at container start, substituting $BASE. It only
 # substitutes names present in the environment, so nginx's own $uri is left alone.
