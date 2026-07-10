@@ -825,7 +825,16 @@ function loadConfigColors(colorData: Record<string, string> | null) {
 }
 
 async function loadConfig() {
-  const config = await fetch(`${baseURL}config.json`).then((r) => r.json()).catch(() => null)
+  const url = `${baseURL}config.json`
+  const config = await fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error(`${r.status} ${r.statusText}`)
+      return r.json()
+    })
+    .catch((err) => {
+      console.warn(`[config] failed to load ${url}: ${err.message}. Falling back to defaults.`)
+      return null
+    })
   loadConfigColors(config?.colors ?? null)
   photoSize = config?.images?.photo?.size || 320
   await loadConfigImages(config)
@@ -857,9 +866,14 @@ async function loadConfigImages(config: any) {
       continue
     }
     if (configLoadedTypes.has(type) && images[type].url) continue
+    const imgUrl = `${baseURL}${entry.folder || 'images'}/${entry.file}`
     try {
-      const res = await fetch(`${baseURL}${entry.folder || 'images'}/${entry.file}`)
-      if (!res.ok) { if (configLoadedTypes.has(type)) { images[type] = emptyImage(); configLoadedTypes.delete(type) } continue }
+      const res = await fetch(imgUrl)
+      if (!res.ok) {
+        console.warn(`[config] image "${type}" not found at ${imgUrl}: ${res.status} ${res.statusText}`)
+        if (configLoadedTypes.has(type)) { images[type] = emptyImage(); configLoadedTypes.delete(type) }
+        continue
+      }
       const blob = await res.blob()
       const mime = blob.type
       const ext = entry.file.split('.').pop()
@@ -872,7 +886,9 @@ async function loadConfigImages(config: any) {
       images[type] = { url: dataURI, blob: file, ext, mime, resized: file }
       configLoadedTypes.add(type)
       resizeImage(type, mime)
-    } catch (_) {}
+    } catch (err) {
+      console.warn(`[config] failed to load image "${type}" from ${imgUrl}:`, err)
+    }
   }
 }
 
