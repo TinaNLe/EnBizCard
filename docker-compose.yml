@@ -10,9 +10,10 @@ services:
     volumes:
       # Mount config and images so they can be updated without rebuilding the image.
       # Create these files/folders on the host before running docker compose up.
-      # No slash before the variable — it already carries its own leading slash.
-      - ./public/config.json:/usr/share/nginx/html${NUXT_APP_BASE_URL:-}/config.json:ro
-      - ./public/images:/usr/share/nginx/html${NUXT_APP_BASE_URL:-}/images:ro
+      # Explicit slash before the variable so this tolerates NUXT_APP_BASE_URL with or
+      # without its own leading slash (matches the Dockerfile's COPY destination).
+      - ./public/config.json:/usr/share/nginx/html/${NUXT_APP_BASE_URL:-}/config.json:ro
+      - ./public/images:/usr/share/nginx/html/${NUXT_APP_BASE_URL:-}/images:ro
     restart: always
 
   dev:
