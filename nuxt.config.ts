@@ -3,6 +3,14 @@
 // '' -> '/', '/bizcard' -> '/bizcard/', '/bizcard/' -> '/bizcard/'
 const base = `/${process.env.NUXT_APP_BASE_URL || ''}/`.replace(/\/+/g, '/')
 
+// Nuxt re-derives runtimeConfig.app.baseURL from process.env.NUXT_APP_BASE_URL a second
+// time (via @nuxt/kit's applyEnv, keyed off the same env var name) after this file runs,
+// clobbering the normalized value above with the raw, un-normalized one. Writing the
+// normalized value back into the env var makes that second pass idempotent instead of
+// undoing the normalization — otherwise every `${baseURL}config.json`-style concatenation
+// silently breaks in subpath deployments (missing trailing slash) while looking fine here.
+process.env.NUXT_APP_BASE_URL = base
+
 const pwaIcons = [64, 120, 144, 152, 192, 384, 512].flatMap((size) => [
   { src: `${base}icon_${size}.png`, sizes: `${size}x${size}`, type: 'image/png' },
   { src: `${base}maskable_${size}.png`, sizes: `${size}x${size}`, type: 'image/png', purpose: 'maskable' },
