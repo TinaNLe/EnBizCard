@@ -825,7 +825,7 @@ function loadConfigColors(colorData: Record<string, string> | null) {
 }
 
 async function loadConfig() {
-  const url = `${baseURL}config.json`
+  const url = `${baseURL}/config.json`
   const config = await fetch(url)
     .then((r) => {
       if (!r.ok) throw new Error(`${r.status} ${r.statusText}`)
